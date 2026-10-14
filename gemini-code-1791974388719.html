@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#183b56">
+<title>Word Quest – Học từ vựng</title>
+<style>
+:root{--navy:#183b56;--blue:#2878a5;--teal:#2a9d8f;--paper:#f5f8fb;--ink:#172b3a;--muted:#607383;--line:#d9e3eb;--good:#e4f7ed;--bad:#fff0ee}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#app{max-width:760px;margin:0 auto;padding:18px 14px 32px}
+header{background:linear-gradient(135deg,#183b56,#2878a5);color:#fff;border-radius:22px;padding:22px 20px;margin-bottom:16px}
+.brand{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.8;font-weight:800}
+h1{font-size:clamp(25px,6vw,34px);margin:5px 0 7px;line-height:1.12}
+header p{margin:0;opacity:.9;font-size:14px}
+.panel{background:white;border:1px solid var(--line);border-radius:18px;padding:17px;margin:12px 0;box-shadow:0 5px 18px #17364a0a}
+label{display:block;font-size:13px;font-weight:750;margin:0 0 7px}
+select,button{font:inherit}
+select{width:100%;min-height:46px;border:1px solid #c9d7e2;border-radius:12px;background:#fff;padding:10px 12px;color:var(--ink);font-size:16px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{border:0;border-radius:13px;min-height:48px;padding:12px 15px;font-weight:800;cursor:pointer;touch-action:manipulation}
+.primary{background:var(--teal);color:#fff;width:100%;margin-top:14px}
+.secondary{background:#e9f1f6;color:var(--navy)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px;text-align:center}
+.stat strong{display:block;font-size:22px;color:var(--navy)}.stat span{font-size:11px;color:var(--muted);font-weight:700}
+.progress{height:8px;background:#e3ebf1;border-radius:99px;overflow:hidden;margin:12px 0 17px}.progress>div{height:100%;background:var(--teal);width:0;transition:width .2s}
+.question-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;font-weight:750}
+.badge{background:#e8f3f8;color:var(--blue);padding:6px 9px;border-radius:99px}
+.prompt{font-size:clamp(25px,6vw,36px);font-weight:850;line-height:1.2;margin:18px 0 7px;overflow-wrap:anywhere}
+.pos{font-size:13px;color:var(--muted);min-height:20px}
+.answers{display:grid;gap:9px;margin-top:20px}
+.answer{display:flex;align-items:center;text-align:left;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:13px 12px;min-height:54px;color:var(--ink);cursor:pointer;font-size:15px;touch-action:manipulation}
+.letter{flex:0 0 29px;height:29px;border-radius:9px;background:#eef3f7;display:grid;place-items:center;font-size:12px;font-weight:850;color:#426075}
+.answer.correct{background:var(--good);border-color:#39a873}.answer.correct .letter{background:#39a873;color:white}
+.answer.wrong{background:var(--bad);border-color:#e47c70}.answer.wrong .letter{background:#e47c70;color:white}
+.answer:disabled{cursor:default}
+.feedback{margin-top:14px;padding:12px;border-radius:12px;font-size:14px;line-height:1.45;display:none}
+.feedback.show{display:block}.feedback.good{background:var(--good)}.feedback.bad{background:var(--bad)}
+.actions{display:flex;gap:10px;margin-top:13px}.actions .btn{flex:1}
+.hidden{display:none!important}.hint{color:var(--muted);font-size:12px;line-height:1.5;margin:12px 2px}
+.finish{text-align:center;padding:18px 4px}.finish .emoji{font-size:42px}.finish h2{margin:8px 0}.finish p{color:var(--muted)}
+.smalllink{background:none;border:0;color:var(--blue);font-weight:750;text-decoration:underline;padding:10px;cursor:pointer}
+#typingArea{margin-top:20px;display:flex;gap:10px}
+#typeInput{flex:1;padding:12px;font-size:16px;border-radius:12px;border:1px solid #c9d7e2;color:var(--ink);font-family:inherit}
+#sentenceArea{margin-top:15px; padding-top:15px; border-top:1px dashed var(--line);}
+#sentenceInput, #viSentenceInput{width:100%; padding:12px; font-size:15px; border-radius:12px; border:1px solid #c9d7e2; color:var(--ink); font-family:inherit; resize:vertical; min-height:80px; margin-bottom:10px;}
+.clickable-word { cursor: pointer; padding: 1px 3px; margin: 0 -1px; border-radius: 4px; transition: background 0.2s, color 0.2s; border-bottom: 1px dotted #2878a5; }
+.clickable-word:hover { background: #d9e3eb; color: #183b56; }
+.speak-btn { cursor: pointer; transition: transform 0.2s; display: inline-block; user-select: none; }
+.speak-btn:hover { transform: scale(1.2); }
+@media(max-width:430px){#app{padding:12px 10px 24px}.panel{padding:14px}.controls{grid-template-columns:1fr}.stats{gap:6px}.stat{padding:9px 4px}.stat strong{font-size:20px}.answer{font-size:14px}#typingArea{flex-direction:column}}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="brand">WORD QUEST · ENGLISH</div>
+  <h1>Chinh phục từ vựng</h1>
+  <p>Chơi nhanh mỗi ngày · Luyện tập & Đặt câu thực tế</p>
+</header>
+
+<section id="setup" class="panel">
+  <div class="controls">
+    <div><label for="topic">Chọn chủ đề</label><select id="topic"></select></div>
+    <div><label for="priority">Nhóm từ</label><select id="priority"><option value="all">Tất cả từ</option><option value="core">Chủ đề trọng tâm</option></select></div>
+    <div><label for="direction">Chiều luyện tập</label><select id="direction"><option value="envi">Anh → Việt</option><option value="vien">Việt → Anh</option></select></div>
+    <div><label for="count">Số câu mỗi lượt</label><select id="count"><option value="10">10 câu</option><option value="20">20 câu</option><option value="all">Tất cả từ phù hợp</option></select></div>
+  </div>
+  <button id="start" class="btn primary">Bắt đầu chơi →</button>
+  <p class="hint">Sau mỗi 10 câu trắc nghiệm sẽ ôn tập gõ lại từ. Bất kể đúng hay sai, bạn đều có cơ hội đặt câu ứng dụng để hiểu sâu hơn!</p>
+</section>
+
+<section id="game" class="hidden">
+  <div class="stats">
+    <div class="stat"><strong id="score">0</strong><span>ĐIỂM</span></div>
+    <div class="stat"><strong id="correctCount">0</strong><span>TRẢ LỜI ĐÚNG</span></div>
+    <div class="stat"><strong id="streak">0</strong><span>CHUỖI ĐÚNG 🔥</span></div>
+  </div>
+  <div class="panel">
+    <div class="question-top"><span id="qNumber">Câu 1/10</span><span id="topicBadge" class="badge">City</span></div>
+    <div class="progress"><div id="progressBar"></div></div>
+    
+    <div id="prompt" class="prompt" style="text-align: center;">city</div>
+    <div id="pos" class="pos" style="text-align: center;"></div>
+    
+    <div id="answers" class="answers"></div>
+    
+    <div id="typingArea" class="hidden">
+      <input type="text" id="typeInput" placeholder="Gõ từ tiếng Anh vào đây..." autocomplete="off">
+      <button id="submitType" class="btn primary" style="margin-top:0; width:auto; white-space:nowrap;">Kiểm tra từ</button>
+    </div>
+
+    <!-- Khu vực đặt câu -->
+    <div id="sentenceArea" class="hidden">
+      <label for="sentenceInput">Hãy đặt một câu tiếng Anh với từ <b><span id="targetWord"></span></b>:</label>
+      <textarea id="sentenceInput" placeholder="Ví dụ: This city is very beautiful at night."></textarea>
+      <button id="submitSentence" class="btn primary" style="margin-top:0;">Phân tích câu (AI)</button>
+      <div id="sentenceFeedback" class="feedback"></div>
+
+      <!-- Khu vực dịch từ Tiếng Việt sang Anh có ép từ khóa -->
+      <div id="viTranslationArea" class="hidden" style="margin-top:15px; padding-top:15px; border-top:1px dashed var(--line);">
+        <label for="viSentenceInput">Câu tiếng Anh ở trên chưa đúng ý? Hãy viết lại bằng tiếng Việt (Hệ thống sẽ tự dịch & chèn từ <b><span id="targetWordVi"></span></b>):</label>
+        <textarea id="viSentenceInput" placeholder="Ví dụ: Thành phố này rất đẹp vào ban đêm."></textarea>
+        <button id="submitViSentence" class="btn secondary" style="margin-top:0;">Dịch tự động bằng AI</button>
+        <div id="viSentenceFeedback" class="feedback"></div>
+      </div>
+      
+      <!-- Hộp hiển thị từ điển khi click từ -->
+      <div id="wordLookupArea" class="hidden" style="margin-top:15px; padding:15px; background:#eef3f7; border-radius:12px; border:1px solid #c9d7e2;">
+        <div style="font-size:12px; font-weight:800; color:#426075; margin-bottom:4px; text-transform:uppercase;">Tra từ điển nhanh</div>
+        <strong>Từ đang tra: <span id="lookupWordTarget" style="color:var(--navy); font-size:18px;"></span></strong>
+        <div id="lookupWordResult" style="margin-top:8px; color:var(--ink); font-size:15px; line-height: 1.5;"></div>
+      </div>
+    </div>
+
+    <div id="feedback" class="feedback" aria-live="polite"></div>
+    
+    <div class="actions">
+      <button id="quit" class="btn secondary">Kết thúc</button>
+      <button id="next" class="btn primary" disabled>Tiếp theo →</button>
+    </div>
+  </div>
+</section>
+
+<section id="result" class="panel hidden">
+  <div class="finish">
+    <div class="emoji" id="resultEmoji">🏆</div>
+    <h2 id="resultTitle">Hoàn thành!</h2>
+    <p id="resultText"></p>
+    <div class="stats">
+      <div class="stat"><strong id="finalScore">0</strong><span>ĐIỂM</span></div>
+      <div class="stat"><strong id="finalCorrect">0/10</strong><span>ĐÚNG</span></div>
+      <div class="stat"><strong id="finalPercent">0%</strong><span>CHÍNH XÁC</span></div>
+    </div>
+    <button id="again" class="btn primary">Chơi lượt mới ↻</button>
+    <button id="back" class="smalllink">Đổi chủ đề / cài đặt</button>
+  </div>
+  <div id="mistakesWrap" class="hidden">
+    <h3>Ôn lại những từ cần nhớ</h3>
+    <div id="mistakes"></div>
+  </div>
+</section>
+</div>
+
+<script>
+// Dữ liệu bộ từ vựng
+const VOCAB = [{"priority": "Trọng tâm", "topic": "City", "word": "city", "pos": "n.", "meaning": "thành phố"}, {"priority": "Trọng tâm", "topic": "City", "word": "urban", "pos": "adj.", "meaning": "thuộc đô thị"}, {"priority": "Trọng tâm", "topic": "City", "word": "population", "pos": "n.", "meaning": "dân số"}, {"priority": "Trọng tâm", "topic": "City", "word": "traffic", "pos": "n.", "meaning": "giao thông"}, {"priority": "Trọng tâm", "topic": "City", "word": "commute", "pos": "v./n.", "meaning": "đi lại hằng ngày"}, {"priority": "Trọng tâm", "topic": "City", "word": "neighborhood", "pos": "n.", "meaning": "khu dân cư"}, {"priority": "Trọng tâm", "topic": "City", "word": "downtown", "pos": "n./adv.", "meaning": "trung tâm thành phố"}, {"priority": "Trọng tâm", "topic": "City", "word": "suburb", "pos": "n.", "meaning": "ngoại ô"}, {"priority": "Trọng tâm", "topic": "City", "word": "building", "pos": "n.", "meaning": "tòa nhà"}, {"priority": "Trọng tâm", "topic": "City", "word": "public transport", "pos": "n.", "meaning": "giao thông công cộng"}, {"priority": "Trọng tâm", "topic": "City", "word": "congestion", "pos": "n.", "meaning": "tình trạng ùn tắc"}, {"priority": "Trọng tâm", "topic": "City", "word": "infrastructure", "pos": "n.", "meaning": "cơ sở hạ tầng"}, {"priority": "Trọng tâm", "topic": "City", "word": "resident", "pos": "n.", "meaning": "cư dân"}, {"priority": "Trọng tâm", "topic": "City", "word": "facility", "pos": "n.", "meaning": "cơ sở / tiện ích"}, {"priority": "Trọng tâm", "topic": "City", "word": "affordable", "pos": "adj.", "meaning": "có giá phải chăng"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "countryside", "pos": "n.", "meaning": "vùng nông thôn"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "rural", "pos": "adj.", "meaning": "thuộc nông thôn"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "village", "pos": "n.", "meaning": "ngôi làng"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "farm", "pos": "n.", "meaning": "nông trại"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "farmer", "pos": "n.", "meaning": "nông dân"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "field", "pos": "n.", "meaning": "cánh đồng"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "crop", "pos": "n.", "meaning": "vụ mùa / cây trồng"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "harvest", "pos": "n./v.", "meaning": "mùa thu hoạch / thu hoạch"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "livestock", "pos": "n.", "meaning": "gia súc"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "soil", "pos": "n.", "meaning": "đất trồng"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "river", "pos": "n.", "meaning": "sông"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "landscape", "pos": "n.", "meaning": "phong cảnh"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "peaceful", "pos": "adj.", "meaning": "yên bình"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "traditional", "pos": "adj.", "meaning": "truyền thống"}, {"priority": "Trọng tâm", "topic": "Countryside", "word": "agriculture", "pos": "n.", "meaning": "nông nghiệp"}, {"priority": "Trọng tâm", "topic": "Education", "word": "education", "pos": "n.", "meaning": "giáo dục"}, {"priority": "Trọng tâm", "topic": "Education", "word": "student", "pos": "n.", "meaning": "học sinh / sinh viên"}, {"priority": "Trọng tâm", "topic": "Education", "word": "teacher", "pos": "n.", "meaning": "giáo viên"}, {"priority": "Trọng tâm", "topic": "Education", "word": "school", "pos": "n.", "meaning": "trường học"}, {"priority": "Trọng tâm", "topic": "Education", "word": "university", "pos": "n.", "meaning": "trường đại học"}, {"priority": "Trọng tâm", "topic": "Education", "word": "subject", "pos": "n.", "meaning": "môn học / chủ đề"}, {"priority": "Trọng tâm", "topic": "Education", "word": "course", "pos": "n.", "meaning": "khóa học"}, {"priority": "Trọng tâm", "topic": "Education", "word": "degree", "pos": "n.", "meaning": "bằng cấp"}, {"priority": "Trọng tâm", "topic": "Education", "word": "assignment", "pos": "n.", "meaning": "bài tập được giao"}, {"priority": "Trọng tâm", "topic": "Education", "word": "exam", "pos": "n.", "meaning": "kỳ thi"}, {"priority": "Trọng tâm", "topic": "Education", "word": "grade", "pos": "n.", "meaning": "điểm số / khối lớp"}, {"priority": "Trọng tâm", "topic": "Education", "word": "skill", "pos": "n.", "meaning": "kỹ năng"}, {"priority": "Trọng tâm", "topic": "Education", "word": "knowledge", "pos": "n.", "meaning": "kiến thức"}, {"priority": "Trọng tâm", "topic": "Education", "word": "scholarship", "pos": "n.", "meaning": "học bổng"}, {"priority": "Trọng tâm", "topic": "Education", "word": "graduate", "pos": "v./n.", "meaning": "tốt nghiệp / người tốt nghiệp"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "environment", "pos": "n.", "meaning": "môi trường"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "pollution", "pos": "n.", "meaning": "ô nhiễm"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "climate change", "pos": "n.", "meaning": "biến đổi khí hậu"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "global warming", "pos": "n.", "meaning": "nóng lên toàn cầu"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "emission", "pos": "n.", "meaning": "khí thải / sự phát thải"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "renewable", "pos": "adj.", "meaning": "có thể tái tạo"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "energy", "pos": "n.", "meaning": "năng lượng"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "recycle", "pos": "v.", "meaning": "tái chế"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "waste", "pos": "n./v.", "meaning": "rác thải / lãng phí"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "plastic", "pos": "n./adj.", "meaning": "nhựa"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "conservation", "pos": "n.", "meaning": "sự bảo tồn"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "resource", "pos": "n.", "meaning": "tài nguyên"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "sustainable", "pos": "adj.", "meaning": "bền vững"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "ecosystem", "pos": "n.", "meaning": "hệ sinh thái"}, {"priority": "Trọng tâm", "topic": "Environment", "word": "biodiversity", "pos": "n.", "meaning": "đa dạng sinh học"}, {"priority": "Trọng tâm", "topic": "Health", "word": "health", "pos": "n.", "meaning": "sức khỏe"}, {"priority": "Trọng tâm", "topic": "Health", "word": "healthy", "pos": "adj.", "meaning": "khỏe mạnh"}, {"priority": "Trọng tâm", "topic": "Health", "word": "disease", "pos": "n.", "meaning": "bệnh"}, {"priority": "Trọng tâm", "topic": "Health", "word": "symptom", "pos": "n.", "meaning": "triệu chứng"}, {"priority": "Trọng tâm", "topic": "Health", "word": "treatment", "pos": "n.", "meaning": "điều trị"}, {"priority": "Trọng tâm", "topic": "Health", "word": "medicine", "pos": "n.", "meaning": "thuốc / y học"}, {"priority": "Trọng tâm", "topic": "Health", "word": "patient", "pos": "n.", "meaning": "bệnh nhân"}, {"priority": "Trọng tâm", "topic": "Health", "word": "doctor", "pos": "n.", "meaning": "bác sĩ"}, {"priority": "Trọng tâm", "topic": "Health", "word": "hospital", "pos": "n.", "meaning": "bệnh viện"}, {"priority": "Trọng tâm", "topic": "Health", "word": "prevent", "pos": "v.", "meaning": "phòng ngừa"}, {"priority": "Trọng tâm", "topic": "Health", "word": "exercise", "pos": "n./v.", "meaning": "tập thể dục / bài tập"}, {"priority": "Trọng tâm", "topic": "Health", "word": "diet", "pos": "n.", "meaning": "chế độ ăn"}, {"priority": "Trọng tâm", "topic": "Health", "word": "mental health", "pos": "n.", "meaning": "sức khỏe tinh thần"}, {"priority": "Trọng tâm", "topic": "Health", "word": "recover", "pos": "v.", "meaning": "hồi phục"}, {"priority": "Trọng tâm", "topic": "Health", "word": "appointment", "pos": "n.", "meaning": "cuộc hẹn khám"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "hobby", "pos": "n.", "meaning": "sở thích"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "interest", "pos": "n.", "meaning": "mối quan tâm / sở thích"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "enjoy", "pos": "v.", "meaning": "thích / tận hưởng"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "relax", "pos": "v.", "meaning": "thư giãn"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "creative", "pos": "adj.", "meaning": "sáng tạo"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "collect", "pos": "v.", "meaning": "sưu tầm"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "reading", "pos": "n.", "meaning": "việc đọc sách"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "photography", "pos": "n.", "meaning": "nhiếp ảnh"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "gardening", "pos": "n.", "meaning": "làm vườn"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "craft", "pos": "n./v.", "meaning": "đồ thủ công / làm thủ công"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "spare time", "pos": "n.", "meaning": "thời gian rảnh"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "take up", "pos": "phr.v.", "meaning": "bắt đầu một sở thích"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "practice", "pos": "n./v.", "meaning": "luyện tập"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "indoors", "pos": "adv.", "meaning": "trong nhà"}, {"priority": "Trọng tâm", "topic": "Hobby & Interests", "word": "outdoors", "pos": "adv.", "meaning": "ngoài trời"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "holiday", "pos": "n.", "meaning": "kỳ nghỉ / ngày lễ"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "vacation", "pos": "n.", "meaning": "kỳ nghỉ"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "destination", "pos": "n.", "meaning": "điểm đến"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "accommodation", "pos": "n.", "meaning": "chỗ ở"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "book", "pos": "v.", "meaning": "đặt trước"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "itinerary", "pos": "n.", "meaning": "lịch trình"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "sightseeing", "pos": "n.", "meaning": "tham quan"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "tourist", "pos": "n.", "meaning": "khách du lịch"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "local", "pos": "adj./n.", "meaning": "địa phương / người địa phương"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "souvenir", "pos": "n.", "meaning": "quà lưu niệm"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "resort", "pos": "n.", "meaning": "khu nghỉ dưỡng"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "relaxing", "pos": "adj.", "meaning": "thư giãn"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "crowded", "pos": "adj.", "meaning": "đông đúc"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "explore", "pos": "v.", "meaning": "khám phá"}, {"priority": "Trọng tâm", "topic": "Holiday", "word": "travel insurance", "pos": "n.", "meaning": "bảo hiểm du lịch"}, {"priority": "Trọng tâm", "topic": "House", "word": "household", "pos": "n.", "meaning": "hộ gia đình"}, {"priority": "Trọng tâm", "topic": "House", "word": "rent", "pos": "n./v.", "meaning": "tiền thuê / thuê"}, {"priority": "Trọng tâm", "topic": "House", "word": "own", "pos": "v.", "meaning": "sở hữu"}, {"priority": "Trọng tâm", "topic": "House", "word": "apartment", "pos": "n.", "meaning": "căn hộ"}, {"priority": "Trọng tâm", "topic": "House", "word": "landlord", "pos": "n.", "meaning": "chủ nhà"}, {"priority": "Trọng tâm", "topic": "House", "word": "tenant", "pos": "n.", "meaning": "người thuê nhà"}, {"priority": "Trọng tâm", "topic": "House", "word": "furniture", "pos": "n.", "meaning": "đồ nội thất"}, {"priority": "Trọng tâm", "topic": "House", "word": "appliance", "pos": "n.", "meaning": "thiết bị gia dụng"}, {"priority": "Trọng tâm", "topic": "House", "word": "utility bill", "pos": "n.", "meaning": "hóa đơn điện nước"}, {"priority": "Trọng tâm", "topic": "House", "word": "repair", "pos": "n./v.", "meaning": "sửa chữa"}, {"priority": "Trọng tâm", "topic": "House", "word": "maintenance", "pos": "n.", "meaning": "bảo trì"}, {"priority": "Trọng tâm", "topic": "House", "word": "spacious", "pos": "adj.", "meaning": "rộng rãi"}, {"priority": "Trọng tâm", "topic": "House", "word": "cozy", "pos": "adj.", "meaning": "ấm cúng"}, {"priority": "Trọng tâm", "topic": "House", "word": "neighborhood", "pos": "n.", "meaning": "khu dân cư"}, {"priority": "Trọng tâm", "topic": "House", "word": "move in", "pos": "phr.v.", "meaning": "chuyển vào ở"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "career", "pos": "n.", "meaning": "sự nghiệp"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "job", "pos": "n.", "meaning": "công việc"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "employer", "pos": "n.", "meaning": "người sử dụng lao động"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "employee", "pos": "n.", "meaning": "nhân viên"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "application", "pos": "n.", "meaning": "đơn ứng tuyển"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "interview", "pos": "n./v.", "meaning": "phỏng vấn"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "qualification", "pos": "n.", "meaning": "bằng cấp / trình độ"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "experience", "pos": "n.", "meaning": "kinh nghiệm"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "salary", "pos": "n.", "meaning": "lương"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "colleague", "pos": "n.", "meaning": "đồng nghiệp"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "deadline", "pos": "n.", "meaning": "hạn chót"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "responsibility", "pos": "n.", "meaning": "trách nhiệm"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "promotion", "pos": "n.", "meaning": "thăng chức"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "workload", "pos": "n.", "meaning": "khối lượng công việc"}, {"priority": "Trọng tâm", "topic": "Job & Study", "word": "resign", "pos": "v.", "meaning": "nghỉ việc"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "language", "pos": "n.", "meaning": "ngôn ngữ"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "fluent", "pos": "adj.", "meaning": "lưu loát"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "vocabulary", "pos": "n.", "meaning": "từ vựng"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "grammar", "pos": "n.", "meaning": "ngữ pháp"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "pronunciation", "pos": "n.", "meaning": "phát âm"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "accent", "pos": "n.", "meaning": "giọng / âm sắc"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "phrase", "pos": "n.", "meaning": "cụm từ"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "translate", "pos": "v.", "meaning": "dịch"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "interpret", "pos": "v.", "meaning": "phiên dịch nói"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "memorize", "pos": "v.", "meaning": "ghi nhớ"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "conversation", "pos": "n.", "meaning": "cuộc hội thoại"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "communicate", "pos": "v.", "meaning": "giao tiếp"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "native speaker", "pos": "n.", "meaning": "người bản ngữ"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "bilingual", "pos": "adj.", "meaning": "song ngữ"}, {"priority": "Trọng tâm", "topic": "Learning foreign languages", "word": "improve", "pos": "v.", "meaning": "cải thiện"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "fitness", "pos": "n.", "meaning": "thể lực"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "workout", "pos": "n.", "meaning": "buổi tập"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "gym", "pos": "n.", "meaning": "phòng tập"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "strength", "pos": "n.", "meaning": "sức mạnh"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "stamina", "pos": "n.", "meaning": "sức bền"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "stretch", "pos": "v.", "meaning": "giãn cơ"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "warm up", "pos": "phr.v.", "meaning": "khởi động"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "muscle", "pos": "n.", "meaning": "cơ bắp"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "weight", "pos": "n.", "meaning": "cân nặng / tạ"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "training", "pos": "n.", "meaning": "việc tập luyện"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "routine", "pos": "n.", "meaning": "thói quen / bài tập thường lệ"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "injury", "pos": "n.", "meaning": "chấn thương"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "healthy lifestyle", "pos": "n.", "meaning": "lối sống lành mạnh"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "competition", "pos": "n.", "meaning": "cuộc thi"}, {"priority": "Trọng tâm", "topic": "Sports & Fitness", "word": "perform", "pos": "v.", "meaning": "thực hiện / thi đấu"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "technology", "pos": "n.", "meaning": "công nghệ"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "device", "pos": "n.", "meaning": "thiết bị"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "software", "pos": "n.", "meaning": "phần mềm"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "hardware", "pos": "n.", "meaning": "phần cứng"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "artificial intelligence", "pos": "n.", "meaning": "trí tuệ nhân tạo"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "data", "pos": "n.", "meaning": "dữ liệu"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "digital", "pos": "adj.", "meaning": "kỹ thuật số"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "online", "pos": "adj./adv.", "meaning": "trực tuyến"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "update", "pos": "n./v.", "meaning": "bản cập nhật / cập nhật"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "privacy", "pos": "n.", "meaning": "quyền riêng tư"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "security", "pos": "n.", "meaning": "bảo mật / an ninh"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "network", "pos": "n.", "meaning": "mạng lưới"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "access", "pos": "n./v.", "meaning": "quyền truy cập / truy cập"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "automate", "pos": "v.", "meaning": "tự động hóa"}, {"priority": "Trọng tâm", "topic": "Technology", "word": "innovation", "pos": "n.", "meaning": "sự đổi mới"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "transport", "pos": "n.", "meaning": "giao thông / vận tải"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "transportation", "pos": "n.", "meaning": "phương tiện / việc vận chuyển"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "journey", "pos": "n.", "meaning": "hành trình"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "destination", "pos": "n.", "meaning": "điểm đến"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "departure", "pos": "n.", "meaning": "sự khởi hành"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "arrival", "pos": "n.", "meaning": "sự đến nơi"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "booking", "pos": "n.", "meaning": "việc đặt chỗ"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "ticket", "pos": "n.", "meaning": "vé"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "fare", "pos": "n.", "meaning": "giá vé"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "commute", "pos": "v./n.", "meaning": "đi lại hằng ngày"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "traffic jam", "pos": "n.", "meaning": "tắc đường"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "public transport", "pos": "n.", "meaning": "giao thông công cộng"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "route", "pos": "n.", "meaning": "tuyến đường"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "delay", "pos": "n./v.", "meaning": "sự chậm trễ / trì hoãn"}, {"priority": "Trọng tâm", "topic": "Travel & Transport", "word": "convenient", "pos": "adj.", "meaning": "thuận tiện"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "culture", "pos": "n.", "meaning": "văn hóa"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "art", "pos": "n.", "meaning": "nghệ thuật"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "artist", "pos": "n.", "meaning": "nghệ sĩ"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "painting", "pos": "n.", "meaning": "tranh / hội họa"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "exhibition", "pos": "n.", "meaning": "triển lãm"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "museum", "pos": "n.", "meaning": "bảo tàng"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "heritage", "pos": "n.", "meaning": "di sản"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "tradition", "pos": "n.", "meaning": "truyền thống"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "creative", "pos": "adj.", "meaning": "sáng tạo"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "performance", "pos": "n.", "meaning": "buổi biểu diễn"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "audience", "pos": "n.", "meaning": "khán giả"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "sculpture", "pos": "n.", "meaning": "tác phẩm điêu khắc"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "influence", "pos": "n./v.", "meaning": "ảnh hưởng"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "identity", "pos": "n.", "meaning": "bản sắc"}, {"priority": "Thông thường", "topic": "Art & Culture", "word": "preserve", "pos": "v.", "meaning": "bảo tồn"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "routine", "pos": "n.", "meaning": "thói quen / lịch sinh hoạt"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "schedule", "pos": "n./v.", "meaning": "lịch trình / lên lịch"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "deadline", "pos": "n.", "meaning": "hạn chót"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "priority", "pos": "n.", "meaning": "ưu tiên"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "manage", "pos": "v.", "meaning": "quản lý"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "organize", "pos": "v.", "meaning": "sắp xếp"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "productive", "pos": "adj.", "meaning": "có năng suất"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "efficient", "pos": "adj.", "meaning": "hiệu quả"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "habit", "pos": "n.", "meaning": "thói quen"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "task", "pos": "n.", "meaning": "nhiệm vụ"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "appointment", "pos": "n.", "meaning": "cuộc hẹn"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "reminder", "pos": "n.", "meaning": "lời nhắc"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "punctual", "pos": "adj.", "meaning": "đúng giờ"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "postpone", "pos": "v.", "meaning": "hoãn"}, {"priority": "Thông thường", "topic": "Daily Routine & Time Management", "word": "balance", "pos": "n./v.", "meaning": "sự cân bằng / cân bằng"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "economy", "pos": "n.", "meaning": "nền kinh tế"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "income", "pos": "n.", "meaning": "thu nhập"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "expense", "pos": "n.", "meaning": "chi phí"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "budget", "pos": "n./v.", "meaning": "ngân sách / lập ngân sách"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "save", "pos": "v.", "meaning": "tiết kiệm"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "spend", "pos": "v.", "meaning": "chi tiêu"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "investment", "pos": "n.", "meaning": "khoản đầu tư"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "profit", "pos": "n.", "meaning": "lợi nhuận"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "loss", "pos": "n.", "meaning": "thua lỗ"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "inflation", "pos": "n.", "meaning": "lạm phát"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "interest rate", "pos": "n.", "meaning": "lãi suất"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "consumer", "pos": "n.", "meaning": "người tiêu dùng"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "afford", "pos": "v.", "meaning": "có đủ khả năng chi trả"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "debt", "pos": "n.", "meaning": "nợ"}, {"priority": "Thông thường", "topic": "Economy & Money", "word": "financial", "pos": "adj.", "meaning": "thuộc tài chính"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "entertainment", "pos": "n.", "meaning": "giải trí"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "media", "pos": "n.", "meaning": "truyền thông"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "content", "pos": "n.", "meaning": "nội dung"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "audience", "pos": "n.", "meaning": "khán giả"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "broadcast", "pos": "v./n.", "meaning": "phát sóng / chương trình phát sóng"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "streaming", "pos": "n.", "meaning": "phát trực tuyến"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "subscribe", "pos": "v.", "meaning": "đăng ký theo dõi"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "headline", "pos": "n.", "meaning": "tiêu đề tin tức"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "journalist", "pos": "n.", "meaning": "nhà báo"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "review", "pos": "n./v.", "meaning": "bài đánh giá / đánh giá"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "celebrity", "pos": "n.", "meaning": "người nổi tiếng"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "advertisement", "pos": "n.", "meaning": "quảng cáo"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "platform", "pos": "n.", "meaning": "nền tảng"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "viral", "pos": "adj.", "meaning": "lan truyền mạnh"}, {"priority": "Thông thường", "topic": "Entertainment & Media", "word": "documentary", "pos": "n.", "meaning": "phim tài liệu"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "fashion", "pos": "n.", "meaning": "thời trang"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "clothing", "pos": "n.", "meaning": "quần áo"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "outfit", "pos": "n.", "meaning": "bộ trang phục"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "style", "pos": "n.", "meaning": "phong cách"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "trend", "pos": "n.", "meaning": "xu hướng"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "comfortable", "pos": "adj.", "meaning": "thoải mái"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "casual", "pos": "adj.", "meaning": "thường ngày"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "formal", "pos": "adj.", "meaning": "trang trọng"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "fabric", "pos": "n.", "meaning": "vải"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "fit", "pos": "v./n.", "meaning": "vừa vặn / dáng"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "brand", "pos": "n.", "meaning": "thương hiệu"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "accessory", "pos": "n.", "meaning": "phụ kiện"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "purchase", "pos": "n./v.", "meaning": "món mua / mua"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "sustainable fashion", "pos": "n.", "meaning": "thời trang bền vững"}, {"priority": "Thông thường", "topic": "Fashion & Clothing", "word": "occasion", "pos": "n.", "meaning": "dịp"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "festival", "pos": "n.", "meaning": "lễ hội"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "celebrate", "pos": "v.", "meaning": "kỷ niệm / ăn mừng"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "tradition", "pos": "n.", "meaning": "truyền thống"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "custom", "pos": "n.", "meaning": "phong tục"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "ceremony", "pos": "n.", "meaning": "nghi lễ"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "parade", "pos": "n.", "meaning": "cuộc diễu hành"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "costume", "pos": "n.", "meaning": "trang phục"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "ancestor", "pos": "n.", "meaning": "tổ tiên"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "community", "pos": "n.", "meaning": "cộng đồng"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "religious", "pos": "adj.", "meaning": "thuộc tôn giáo"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "annual", "pos": "adj.", "meaning": "hằng năm"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "symbolize", "pos": "v.", "meaning": "tượng trưng"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "fireworks", "pos": "n.", "meaning": "pháo hoa"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "gathering", "pos": "n.", "meaning": "buổi tụ họp"}, {"priority": "Thông thường", "topic": "Festivals & Traditions", "word": "celebration", "pos": "n.", "meaning": "sự ăn mừng / lễ kỷ niệm"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "nutrition", "pos": "n.", "meaning": "dinh dưỡng"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "ingredient", "pos": "n.", "meaning": "nguyên liệu"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "protein", "pos": "n.", "meaning": "chất đạm"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "carbohydrate", "pos": "n.", "meaning": "carbohydrate / chất bột đường"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "vitamin", "pos": "n.", "meaning": "vitamin"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "balanced diet", "pos": "n.", "meaning": "chế độ ăn cân bằng"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "nutritious", "pos": "adj.", "meaning": "bổ dưỡng"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "calorie", "pos": "n.", "meaning": "calo"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "consume", "pos": "v.", "meaning": "tiêu thụ"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "portion", "pos": "n.", "meaning": "khẩu phần"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "fresh", "pos": "adj.", "meaning": "tươi"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "processed food", "pos": "n.", "meaning": "thực phẩm chế biến sẵn"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "vegetarian", "pos": "n./adj.", "meaning": "người ăn chay / thuần chay"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "ingredient", "pos": "n.", "meaning": "thành phần"}, {"priority": "Thông thường", "topic": "Food & Nutrition", "word": "hydration", "pos": "n.", "meaning": "việc bổ sung nước"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "goal", "pos": "n.", "meaning": "mục tiêu"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "ambition", "pos": "n.", "meaning": "tham vọng / hoài bão"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "plan", "pos": "n./v.", "meaning": "kế hoạch / lên kế hoạch"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "achieve", "pos": "v.", "meaning": "đạt được"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "succeed", "pos": "v.", "meaning": "thành công"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "opportunity", "pos": "n.", "meaning": "cơ hội"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "challenge", "pos": "n.", "meaning": "thử thách"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "motivation", "pos": "n.", "meaning": "động lực"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "improve", "pos": "v.", "meaning": "cải thiện"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "develop", "pos": "v.", "meaning": "phát triển"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "future", "pos": "n.", "meaning": "tương lai"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "determined", "pos": "adj.", "meaning": "quyết tâm"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "potential", "pos": "n.", "meaning": "tiềm năng"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "progress", "pos": "n./v.", "meaning": "tiến bộ / tiến triển"}, {"priority": "Thông thường", "topic": "Plans & Ambitions", "word": "accomplish", "pos": "v.", "meaning": "hoàn thành"}, {"priority": "Thông thường", "topic": "Public Services", "word": "public service", "pos": "n.", "meaning": "dịch vụ công"}, {"priority": "Thông thường", "topic": "Public Services", "word": "government", "pos": "n.", "meaning": "chính phủ"}, {"priority": "Thông thường", "topic": "Public Services", "word": "authority", "pos": "n.", "meaning": "cơ quan có thẩm quyền"}, {"priority": "Thông thường", "topic": "Public Services", "word": "application form", "pos": "n.", "meaning": "đơn đăng ký"}, {"priority": "Thông thường", "topic": "Public Services", "word": "permit", "pos": "n./v.", "meaning": "giấy phép / cho phép"}, {"priority": "Thông thường", "topic": "Public Services", "word": "regulation", "pos": "n.", "meaning": "quy định"}, {"priority": "Thông thường", "topic": "Public Services", "word": "citizen", "pos": "n.", "meaning": "công dân"}, {"priority": "Thông thường", "topic": "Public Services", "word": "facility", "pos": "n.", "meaning": "cơ sở / tiện ích"}, {"priority": "Thông thường", "topic": "Public Services", "word": "public transport", "pos": "n.", "meaning": "giao thông công cộng"}, {"priority": "Thông thường", "topic": "Public Services", "word": "waste collection", "pos": "n.", "meaning": "thu gom rác"}, {"priority": "Thông thường", "topic": "Public Services", "word": "emergency", "pos": "n.", "meaning": "tình huống khẩn cấp"}, {"priority": "Thông thường", "topic": "Public Services", "word": "report", "pos": "v./n.", "meaning": "báo cáo / bản báo cáo"}, {"priority": "Thông thường", "topic": "Public Services", "word": "provide", "pos": "v.", "meaning": "cung cấp"}, {"priority": "Thông thường", "topic": "Public Services", "word": "accessible", "pos": "adj.", "meaning": "có thể tiếp cận"}, {"priority": "Thông thường", "topic": "Public Services", "word": "complaint", "pos": "n.", "meaning": "khiếu nại"}, {"priority": "Thông thường", "topic": "Relationship", "word": "relationship", "pos": "n.", "meaning": "mối quan hệ"}, {"priority": "Thông thường", "topic": "Relationship", "word": "communicate", "pos": "v.", "meaning": "giao tiếp"}, {"priority": "Thông thường", "topic": "Relationship", "word": "trust", "pos": "n./v.", "meaning": "niềm tin / tin tưởng"}, {"priority": "Thông thường", "topic": "Relationship", "word": "respect", "pos": "n./v.", "meaning": "sự tôn trọng / tôn trọng"}, {"priority": "Thông thường", "topic": "Relationship", "word": "support", "pos": "n./v.", "meaning": "sự hỗ trợ / hỗ trợ"}, {"priority": "Thông thường", "topic": "Relationship", "word": "conflict", "pos": "n.", "meaning": "mâu thuẫn"}, {"priority": "Thông thường", "topic": "Relationship", "word": "compromise", "pos": "n./v.", "meaning": "thỏa hiệp"}, {"priority": "Thông thường", "topic": "Relationship", "word": "understand", "pos": "v.", "meaning": "thấu hiểu"}, {"priority": "Thông thường", "topic": "Relationship", "word": "reliable", "pos": "adj.", "meaning": "đáng tin cậy"}, {"priority": "Thông thường", "topic": "Relationship", "word": "honest", "pos": "adj.", "meaning": "trung thực"}, {"priority": "Thông thường", "topic": "Relationship", "word": "affection", "pos": "n.", "meaning": "tình cảm"}, {"priority": "Thông thường", "topic": "Relationship", "word": "commitment", "pos": "n.", "meaning": "sự cam kết"}, {"priority": "Thông thường", "topic": "Relationship", "word": "communicate openly", "pos": "phr.", "meaning": "giao tiếp cởi mở"}, {"priority": "Thông thường", "topic": "Relationship", "word": "get along", "pos": "phr.v.", "meaning": "hòa thuận"}, {"priority": "Thông thường", "topic": "Relationship", "word": "resolve", "pos": "v.", "meaning": "giải quyết"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "shopping", "pos": "n.", "meaning": "việc mua sắm"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "consumer", "pos": "n.", "meaning": "người tiêu dùng"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "purchase", "pos": "n./v.", "meaning": "món mua / mua"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "price", "pos": "n.", "meaning": "giá"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "discount", "pos": "n.", "meaning": "giảm giá"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "refund", "pos": "n./v.", "meaning": "hoàn tiền"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "receipt", "pos": "n.", "meaning": "hóa đơn"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "quality", "pos": "n.", "meaning": "chất lượng"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "brand", "pos": "n.", "meaning": "thương hiệu"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "budget", "pos": "n.", "meaning": "ngân sách"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "bargain", "pos": "n./v.", "meaning": "món hời / mặc cả"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "online shopping", "pos": "n.", "meaning": "mua sắm trực tuyến"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "delivery", "pos": "n.", "meaning": "giao hàng"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "return policy", "pos": "n.", "meaning": "chính sách đổi trả"}, {"priority": "Thông thường", "topic": "Shopping & Consumerism", "word": "essential", "pos": "n./adj.", "meaning": "đồ thiết yếu / thiết yếu"}, {"priority": "Thông thường", "topic": "Weather", "word": "weather", "pos": "n.", "meaning": "thời tiết"}, {"priority": "Thông thường", "topic": "Weather", "word": "forecast", "pos": "n./v.", "meaning": "dự báo"}, {"priority": "Thông thường", "topic": "Weather", "word": "temperature", "pos": "n.", "meaning": "nhiệt độ"}, {"priority": "Thông thường", "topic": "Weather", "word": "humidity", "pos": "n.", "meaning": "độ ẩm"}, {"priority": "Thông thường", "topic": "Weather", "word": "rainfall", "pos": "n.", "meaning": "lượng mưa"}, {"priority": "Thông thường", "topic": "Weather", "word": "storm", "pos": "n.", "meaning": "bão"}, {"priority": "Thông thường", "topic": "Weather", "word": "thunderstorm", "pos": "n.", "meaning": "dông bão"}, {"priority": "Thông thường", "topic": "Weather", "word": "windy", "pos": "adj.", "meaning": "có gió"}, {"priority": "Thông thường", "topic": "Weather", "word": "cloudy", "pos": "adj.", "meaning": "nhiều mây"}, {"priority": "Thông thường", "topic": "Weather", "word": "sunny", "pos": "adj.", "meaning": "có nắng"}, {"priority": "Thông thường", "topic": "Weather", "word": "drought", "pos": "n.", "meaning": "hạn hán"}, {"priority": "Thông thường", "topic": "Weather", "word": "flood", "pos": "n./v.", "meaning": "lũ lụt / làm ngập"}, {"priority": "Thông thường", "topic": "Weather", "word": "climate", "pos": "n.", "meaning": "khí hậu"}, {"priority": "Thông thường", "topic": "Weather", "word": "mild", "pos": "adj.", "meaning": "ôn hòa"}, {"priority": "Thông thường", "topic": "Weather", "word": "extreme weather", "pos": "n.", "meaning": "thời tiết cực đoan"}, {"priority": "Thông thường", "topic": "Work", "word": "workplace", "pos": "n.", "meaning": "nơi làm việc"}, {"priority": "Thông thường", "topic": "Work", "word": "colleague", "pos": "n.", "meaning": "đồng nghiệp"}, {"priority": "Thông thường", "topic": "Work", "word": "meeting", "pos": "n.", "meaning": "cuộc họp"}, {"priority": "Thông thường", "topic": "Work", "word": "project", "pos": "n.", "meaning": "dự án"}, {"priority": "Thông thường", "topic": "Work", "word": "task", "pos": "n.", "meaning": "nhiệm vụ"}, {"priority": "Thông thường", "topic": "Work", "word": "deadline", "pos": "n.", "meaning": "hạn chót"}, {"priority": "Thông thường", "topic": "Work", "word": "teamwork", "pos": "n.", "meaning": "làm việc nhóm"}, {"priority": "Thông thường", "topic": "Work", "word": "manager", "pos": "n.", "meaning": "quản lý"}, {"priority": "Thông thường", "topic": "Work", "word": "client", "pos": "n.", "meaning": "khách hàng"}, {"priority": "Thông thường", "topic": "Work", "word": "report", "pos": "n.", "meaning": "báo cáo"}, {"priority": "Thông thường", "topic": "Work", "word": "feedback", "pos": "n.", "meaning": "phản hồi"}, {"priority": "Thông thường", "topic": "Work", "word": "performance", "pos": "n.", "meaning": "hiệu suất"}, {"priority": "Thông thường", "topic": "Work", "word": "professional", "pos": "adj.", "meaning": "chuyên nghiệp"}, {"priority": "Thông thường", "topic": "Work", "word": "collaborate", "pos": "v.", "meaning": "cộng tác"}, {"priority": "Thông thường", "topic": "Work", "word": "workload", "pos": "n.", "meaning": "khối lượng công việc"}];
+
+const $ = id => document.getElementById(id);
+let deck=[], index=0, score=0, correct=0, streak=0, bestStreak=0, answered=false, misses=[];
+let isTypingPhase=false, typingDeck=[], typingIndex=0, totalAnswered=0;
+let checkingSentence = false;
+
+const unique = arr => [...new Set(arr)];
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function detectTense(text) {
+  const lower = text.toLowerCase();
+  if (/(will have been)\s+\w+ing/i.test(lower)) return "Tương lai hoàn thành tiếp diễn";
+  if (/(will have)\s+\w+/i.test(lower)) return "Tương lai hoàn thành";
+  if (/(will be)\s+\w+ing/i.test(lower)) return "Tương lai tiếp diễn";
+  if (/\b(will|shall)\b/i.test(lower) || /(am|is|are)\s+going\s+to/i.test(lower)) return "Tương lai đơn";
+  if (/(had been)\s+\w+ing/i.test(lower)) return "Quá khứ hoàn thành tiếp diễn";
+  if (/\bhad\b\s+\w+/i.test(lower)) return "Quá khứ hoàn thành";
+  if (/(was|were)\s+\w+ing/i.test(lower)) return "Quá khứ tiếp diễn";
+  if (/(have|has)\s+been\s+\w+ing/i.test(lower)) return "Hiện tại hoàn thành tiếp diễn";
+  if (/(have|has)\s+(already\s+|just\s+|never\s+)?\w+(ed|en|t|n)\b/i.test(lower)) return "Hiện tại hoàn thành";
+  if (/(am|is|are)\s+\w+ing/i.test(lower)) return "Hiện tại tiếp diễn";
+  if (/(yesterday|last\s+\w+|ago)/i.test(lower) || /\b\w+ed\b/i.test(lower) || /\b(was|were|did|went|saw|took|made|came|knew|thought|bought|brought)\b/i.test(lower)) return "Quá khứ đơn";
+  return "Hiện tại đơn (Hoặc nguyên thể không chia)";
+}
+
+function init(){
+  const topics=unique(VOCAB.map(v=>v.topic));
+  $('topic').innerHTML='<option value="all">Tất cả chủ đề (26)</option>'+topics.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+  
+  $('start').addEventListener('click',startGame);
+  $('next').addEventListener('click',nextQuestion);
+  $('quit').addEventListener('click',finishGame);
+  $('again').addEventListener('click',startGame);
+  $('back').addEventListener('click',()=>{$('result').classList.add('hidden');$('setup').classList.remove('hidden');});
+  
+  $('submitType').addEventListener('click', checkTypingAnswer);
+  $('typeInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') checkTypingAnswer();
+  });
+
+  $('submitSentence').addEventListener('click', analyzeSentence);
+  $('submitViSentence').addEventListener('click', translateViToEn);
+}
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function makeClickable(text) {
+  let result = '';
+  let regex = /([a-zA-Z]+(?:'[a-zA-Z]+)?)/g;
+  let lastIndex = 0;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    result += escapeHtml(text.substring(lastIndex, match.index));
+    result += `<span class="clickable-word" onclick="lookupWord(this.innerText)">${escapeHtml(match[0])}</span>`;
+    lastIndex = regex.lastIndex;
+  }
+  result += escapeHtml(text.substring(lastIndex));
+  return result;
+}
+
+function fetchPhonetic(word, elementId) {
+  const cleanWord = word.replace(/[^a-zA-Z\-']/g, '').toLowerCase();
+  if (!cleanWord) return;
+  fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(cleanWord)}&ipa=1&max=1`)
+    .then(r => r.ok ? r.json() : null)
+    .then(apiData => {
+       let phonetic = '';
+       if (apiData && apiData.length > 0 && apiData[0].tags) {
+           const ipaTag = apiData[0].tags.find(t => t.startsWith('ipa_pron:'));
+           if (ipaTag) phonetic = '/' + ipaTag.replace('ipa_pron:', '') + '/';
+       }
+       const el = document.getElementById(elementId);
+       if (el && phonetic) el.textContent = phonetic;
+    }).catch(()=>{});
+}
+
+function speakWord(word) {
+  const utterance = new SpeechSynthesisUtterance(word);
+  utterance.lang = 'en-US';
+  window.speechSynthesis.speak(utterance);
+}
+
+async function lookupWord(word) {
+  const cleanWord = word.replace(/[^a-zA-Z\-']/g, '').toLowerCase();
+  if (!cleanWord) return;
+  
+  $('wordLookupArea').classList.remove('hidden');$('lookupWordTarget').textContent = cleanWord;
+  $('lookupWordResult').innerHTML = '<span style="color:var(--muted)">⏳ Đang tra từ...</span>';
+  
+  try {
+    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(cleanWord)}&langpair=en|vi`);
+    const data = await res.json();
+    const translated = data.responseData.translatedText;
+    
+    const speakBtn = `<button onclick="speakWord('${escapeHtml(cleanWord.replace(/'/g, "\\'"))}')" style="background:none; border:none; cursor:pointer; font-size:18px; vertical-align:middle;" title="Nghe phát âm">🔊</button>`;
+
+    $('lookupWordResult').innerHTML = `<div id="phoneticWrap"><b>Phiên âm (Anh):</b> <span style="color:var(--muted); font-size:13px;">⏳ Đang tải...</span></div><div style="margin-top:4px"><b>Nghĩa:</b> ${escapeHtml(translated)}</div>`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    
+    fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`, { signal: controller.signal })
+      .then(r => { clearTimeout(timeoutId); return r.ok ? r.json() : null; })
+      .then(dictData => {
+         let phonetic = '';
+         if (dictData && dictData[0]) {
+             if (dictData[0].phonetic) phonetic = dictData[0].phonetic;
+             else if (dictData[0].phonetics && dictData[0].phonetics.length > 0) {
+                 const p = dictData[0].phonetics.find(x => x.text);
+                 if (p) phonetic = p.text;
+             }
+         }
+         
+         const wrap = document.getElementById('phoneticWrap');
+         if (wrap) {
+             if (phonetic) wrap.innerHTML = `<b>Phiên âm (Anh):</b> <span style="color:#2a9d8f; font-family: monospace; font-size:16px;">${escapeHtml(phonetic)}</span> ${speakBtn}`;
+             else wrap.innerHTML = `<b>Phiên âm (Anh):</b> <i style="color:#607383; font-size:13px;">(Không có sẵn)</i> ${speakBtn}`;
+         }
+      })
+      .catch(() => {
+         clearTimeout(timeoutId);
+         fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(cleanWord)}&ipa=1&max=1`)
+          .then(r => r.ok ? r.json() : null)
+          .then(apiData => {
+             let phonetic = '';
+             if (apiData && apiData.length > 0 && apiData[0].tags) {
+                 const ipaTag = apiData[0].tags.find(t => t.startsWith('ipa_pron:'));
+                 if (ipaTag) phonetic = '/' + ipaTag.replace('ipa_pron:', '') + '/';
+             }
+             const wrap = document.getElementById('phoneticWrap');
+             if (wrap) {
+                 if (phonetic) wrap.innerHTML = `<b>Phiên âm (Anh):</b> <span style="color:#2a9d8f; font-family: monospace; font-size:16px;">${escapeHtml(phonetic)}</span> ${speakBtn}`;
+                 else wrap.innerHTML = `<b>Phiên âm (Anh):</b> <i style="color:#607383; font-size:13px;">(Không có sẵn)</i> ${speakBtn}`;
+             }
+          }).catch(() => {
+             const wrap = document.getElementById('phoneticWrap');
+             if (wrap) wrap.innerHTML = `<b>Phiên âm (Anh):</b> <i style="color:#607383; font-size:13px;">(Không có sẵn)</i> ${speakBtn}`;
+          });
+      });
+      
+  } catch(e) {
+    $('lookupWordResult').innerHTML = '<i>Lỗi kết nối khi tra từ.</i>';
+  }
+}
+
+function startGame(){
+  let pool=VOCAB.slice();
+  const topic=$('topic').value, priority=$('priority').value;
+  if(topic!=='all') pool=pool.filter(v=>v.topic===topic);
+  if(priority==='core') pool=pool.filter(v=>v.priority.toLowerCase().includes('trọng tâm'));
+  if(pool.length<4){alert('Chủ đề này chưa đủ 4 từ để tạo câu hỏi.');return;}
+  const n=$('count').value==='all'?pool.length:Math.min(Number($('count').value),pool.length);
+  deck=shuffle(pool).slice(0,n);
+  
+  index=score=correct=streak=bestStreak=totalAnswered=0;
+  misses=[]; answered=false; isTypingPhase=false; checkingSentence=false;
+  
+  $('setup').classList.add('hidden');
+  $('result').classList.add('hidden');$('game').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered=false; checkingSentence = false;
+  const item=deck[index], vi=$('direction').value==='envi';$('qNumber').textContent=`Câu ${index+1}/${deck.length}`;
+  $('topicBadge').textContent=item.topic;
+  $('progressBar').style.width=`${index/deck.length*100}%`;
+  
+  if (vi) { 
+    $('prompt').innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
+        <span>${escapeHtml(item.word)}</span>
+        <span class="speak-btn" onclick="speakWord('${escapeHtml(item.word.replace(/'/g, "\\'"))}')" style="font-size:28px;">🔊</span>
+      </div>
+      <div id="promptPhonetic" style="font-size:18px; color:var(--teal); font-weight:normal; margin-top:4px; min-height:22px;"></div>
+    `;
+    fetchPhonetic(item.word, 'promptPhonetic');
+    $('pos').textContent = 'Chọn nghĩa tiếng Việt (' + item.pos + ')';
+  } else { 
+    $('prompt').textContent = item.meaning;
+    $('pos').textContent = 'Chọn từ tiếng Anh phù hợp';
+  }
+  
+  $('typingArea').classList.add('hidden');$('sentenceArea').classList.add('hidden');
+  $('answers').classList.remove('hidden');$('wordLookupArea').classList.add('hidden');
+  
+  $('feedback').className='feedback';$('feedback').textContent='';
+  $('next').disabled=true;$('next').textContent=index===deck.length-1?'Xem kết quả →':'Tiếp theo →';
+  
+  const answerText=v=>vi?v.meaning:v.word;
+  const wrong=shuffle(VOCAB.filter(v=>v.word!==item.word && answerText(v)!==answerText(item))).slice(0,3);
+  const choices=shuffle([item,...wrong]);
+  $('answers').innerHTML='';
+  
+  choices.forEach((choice,i)=>{
+    const b=document.createElement('button');b.type='button';b.className='answer';
+    const isEngChoice = !vi; 
+    
+    if (isEngChoice) {
+      const phoneticId = `choicePhonetic_${i}`;
+      b.innerHTML=`
+        <span class="letter">${String.fromCharCode(65+i)}</span>
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+          <span style="font-size:16px;">${escapeHtml(choice.word)}</span>
+          <span id="${phoneticId}" style="font-size:13px; color:#2878a5; font-weight:normal;"></span>
+        </div>
+        <span class="speak-btn" onclick="event.stopPropagation(); speakWord('${escapeHtml(choice.word.replace(/'/g, "\\'"))}')" style="font-size:20px; padding:0 8px;">🔊</span>
+      `;
+      fetchPhonetic(choice.word, phoneticId);
+    } else {
+      b.innerHTML=`<span class="letter">${String.fromCharCode(65+i)}</span><span style="flex:1">${escapeHtml(choice.meaning)}</span>`;
+    }
+    b.addEventListener('click',()=>chooseAnswer(b,choice,item,vi));
+    $('answers').appendChild(b);
+  });
+  
+  $('score').textContent=score;$('correctCount').textContent=correct;$('streak').textContent=streak;
+}
+
+function chooseAnswer(button,choice,item,vi){
+  if(answered)return;answered=true; totalAnswered++;
+  const right=vi?item.meaning:item.word;
+  const chosen=vi?choice.meaning:choice.word;
+  const buttons=[...$('answers').querySelectorAll('button')];
+  buttons.forEach(b=>{b.disabled=true;if(b.lastElementChild.textContent===right)b.classList.add('correct');});
+  const fb=$('feedback');
+  
+  const speakBtnHtml = `<button onclick="speakWord('${escapeHtml(item.word.replace(/'/g, "\\'"))}')" style="background:none; border:none; cursor:pointer; font-size:16px; vertical-align:middle; padding:0 4px;" title="Nghe lại">🔊</button>`;
+
+  if(chosen===right){
+      correct++;score+=10+Math.min(streak,5)*2;streak++;bestStreak=Math.max(bestStreak,streak);
+      fb.className='feedback show good';
+      fb.innerHTML='<strong>Chính xác! + điểm 🎉</strong><br>'+escapeHtml(item.word)+' ' + speakBtnHtml + ' ('+escapeHtml(item.pos)+') — '+escapeHtml(item.meaning);
+  } else {
+      streak=0;button.classList.add('wrong');misses.push(item);
+      fb.className='feedback show bad';
+      fb.innerHTML='<strong>Chưa đúng.</strong> Đáp án: <b>'+escapeHtml(right)+'</b><br>'+escapeHtml(item.word)+' ' + speakBtnHtml + ' ('+escapeHtml(item.pos)+') — '+escapeHtml(item.meaning);
+  }
+  
+  $('score').textContent=score;$('correctCount').textContent=correct;$('streak').textContent=streak;
+  let percentWidth = 100;
+  if (!isTypingPhase) percentWidth = ((index+1)/deck.length)*100;
+  $('progressBar').style.width=`${percentWidth}%`;
+  $('next').disabled=false;
+}
+
+function startTypingPhase() {
+  isTypingPhase = true;
+  let startIdx = Math.max(0, index - 9);
+  typingDeck = deck.slice(startIdx, index + 1);
+  typingIndex = 0;
+  renderTypingQuestion();
+}
+
+function renderTypingQuestion() {
+  answered = false; checkingSentence = false;
+  const item = typingDeck[typingIndex];
+  
+  $('qNumber').textContent = `Ôn tập ${typingIndex + 1}/${typingDeck.length}`;
+  $('topicBadge').textContent = 'Viết lại từ';
+  $('progressBar').style.width = `${(typingIndex / typingDeck.length) * 100}%`;
+  
+  $('prompt').innerHTML = `
+      <div style="font-size:20px; margin-bottom: 8px;">${escapeHtml(item.meaning)}</div>
+  `;
+  $('pos').textContent = 'Gõ từ tiếng Anh tương ứng (' + item.pos + ')';
+  
+  $('answers').classList.add('hidden');
+  $('sentenceArea').classList.add('hidden');$('viTranslationArea').classList.add('hidden');
+  $('wordLookupArea').classList.add('hidden');$('typingArea').classList.remove('hidden');
+  
+  $('typeInput').value = '';$('typeInput').disabled = false;
+  $('submitType').disabled = false;
+  $('typeInput').focus();$('feedback').className = 'feedback'; 
+  $('feedback').textContent = '';$('next').disabled = true;
+  $('next').textContent = (typingIndex === typingDeck.length - 1 && index === deck.length - 1) ? 'Xem kết quả →' : 'Tiếp theo →';
+}
+
+function checkTypingAnswer() {
+  if (answered) return;
+  const inputVal = $('typeInput').value.trim().toLowerCase();
+  if (!inputVal) return;
+  
+  answered = true; totalAnswered++;
+  $('typeInput').disabled = true;
+  $('submitType').disabled = true;
+  
+  const item = typingDeck[typingIndex];
+  const right = item.word.toLowerCase();
+  const fb = $('feedback');
+  
+  const speakBtnHtml = `<button onclick="speakWord('${escapeHtml(item.word.replace(/'/g, "\\'"))}')" style="background:none; border:none; cursor:pointer; font-size:16px; vertical-align:middle; padding:0 4px;" title="Nghe lại">🔊</button>`;
+
+  if (inputVal === right) {
+    correct++;
+    score += 15 + Math.min(streak, 5) * 2;
+    streak++;
+    bestStreak = Math.max(bestStreak, streak);
+    
+    fb.className = 'feedback show good';
+    fb.innerHTML = '<strong>Tuyệt vời! + điểm 🎉</strong><br>' + escapeHtml(item.word) + ' ' + speakBtnHtml + ' — ' + escapeHtml(item.meaning);
+  } else {
+    streak = 0;
+    misses.push(item);
+    fb.className = 'feedback show bad';
+    fb.innerHTML = '<strong>Chưa đúng.</strong> Đáp án: <b>' + escapeHtml(item.word) + '</b> ' + speakBtnHtml + '<br>Bạn nhập: ' + escapeHtml(inputVal);
+  }
+  
+  $('score').textContent = score;
+  $('correctCount').textContent = correct;
+  $('streak').textContent = streak;
+  $('progressBar').style.width = `${((typingIndex + 1) / typingDeck.length) * 100}%`;
+  
+  prepareSentencePhase(item);
+}
+
+function prepareSentencePhase(item) {
+  checkingSentence = false;
+  $('next').disabled = false;
+  $('sentenceArea').classList.remove('hidden');$('viTranslationArea').classList.add('hidden');
+  $('wordLookupArea').classList.add('hidden');$('targetWord').textContent = item.word;
+  $('targetWordVi').textContent = item.word; 
+  
+  $('sentenceInput').value = '';$('sentenceInput').disabled = false;
+  $('submitSentence').disabled = false;
+  $('sentenceFeedback').className = 'feedback';$('sentenceFeedback').innerHTML = '';
+  
+  $('viSentenceInput').value = '';$('viSentenceInput').disabled = false;
+  $('submitViSentence').disabled = false;
+  $('viSentenceFeedback').className = 'feedback';$('viSentenceFeedback').innerHTML = '';
+}
+
+async function analyzeSentence() {
+  const sentence = $('sentenceInput').value.trim();
+  const item = typingDeck[typingIndex];
+  const word = item.word.toLowerCase();
+  const fb = $('sentenceFeedback');
+
+  if (!sentence) {
+    fb.className = 'feedback show bad';
+    fb.innerHTML = 'Vui lòng nhập một câu trước khi kiểm tra, hoặc ấn "Tiếp theo" để bỏ qua.';
+    return;
+  }
+
+  if (!sentence.toLowerCase().includes(word)) {
+    fb.className = 'feedback show bad';
+    fb.innerHTML = `Câu của bạn cần chứa từ vựng đang học: <b>${escapeHtml(item.word)}</b>.`;
+    return;
+  }
+
+  checkingSentence = true;
+  $('submitSentence').disabled = true;
+  $('sentenceInput').disabled = true;
+  $('next').disabled = true;
+  $('wordLookupArea').classList.add('hidden');
+  
+  fb.className = 'feedback show';
+  fb.innerHTML = '⏳ Đang phân tích ngữ pháp và dịch thuật...';
+
+  try {
+    const res = await fetch('https://api.languagetool.org/v2/check', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `language=en-US&text=${encodeURIComponent(sentence)}`
+    });
+    const data = await res.json();
+    
+    let correctedSentence = sentence;
+    let matches = data.matches ? data.matches.sort((a,b) => b.offset - a.offset) : [];
+    
+    matches.forEach(m => {
+      if (m.replacements && m.replacements.length > 0) {
+        let rep = m.replacements[0].value;
+        let before = correctedSentence.substring(0, m.offset);
+        let after = correctedSentence.substring(m.offset + m.length);
+        correctedSentence = before + rep + after;
+      }
+    });
+
+    const trRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(correctedSentence)}&langpair=en|vi`);
+    const trData = await trRes.json();
+    const translatedText = trData.responseData.translatedText;
+    
+    const tenseName = detectTense(correctedSentence);
+
+    if (matches.length > 0) {
+      fb.className = 'feedback show bad';
+      let errorsHtml = '<strong>Phát hiện lỗi ngữ pháp:</strong><ul style="margin:5px 0 10px; padding-left:20px;">';
+      for (let i = 0; i < Math.min(matches.length, 2); i++) {
+         let m = matches[i];
+         let msgTrRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(m.message)}&langpair=en|vi`);
+         let msgTrData = await msgTrRes.json();
+         let msgVi = msgTrData.responseData.translatedText;
+         errorsHtml += `<li>${escapeHtml(msgVi)}`;
+         if (m.replacements && m.replacements.length > 0) {
+           errorsHtml += ` <br><i style="color:#2878a5;">(Gợi ý thay bằng: <b>${escapeHtml(m.replacements.slice(0,3).map(r=>r.value).join(', '))}</b>)</i>`;
+         }
+         errorsHtml += `</li>`;
+      }
+      if (matches.length > 2) errorsHtml += `<li>Và một số lỗi nhỏ khác...</li>`;
+      errorsHtml += '</ul>';
+      errorsHtml += `<strong>Thì (Tense) sử dụng:</strong> <span style="color:#2a9d8f">${escapeHtml(tenseName)}</span><br><br>`;
+      errorsHtml += `<strong>Gợi ý câu đúng sát nghĩa: </strong> <span style="color:var(--muted); font-size:12px;">(💡 Click vào từ để tra nghĩa & nghe phát âm)</span><br><span style="color:#2878a5; line-height:1.6;">${makeClickable(correctedSentence)}</span><br><br>`;
+      errorsHtml += `<strong>Dịch sang tiếng Việt:</strong><br><span style="color:#607383">${escapeHtml(translatedText)}</span>`;
+      
+      fb.innerHTML = errorsHtml;
+    } else {
+      fb.className = 'feedback show good';
+      score += 5; 
+      $('score').textContent = score;
+      fb.innerHTML = `<strong>Tuyệt vời!</strong> Câu của bạn đúng ngữ pháp. (+5 điểm) 🎉<br><br>
+                      <strong>Thì (Tense) sử dụng:</strong> <span style="color:#2a9d8f">${escapeHtml(tenseName)}</span><br><br>
+                      <strong>Câu của bạn: </strong> <span style="color:var(--muted); font-size:12px;">(💡 Click vào từ để tra nghĩa & nghe phát âm)</span><br><span style="color:#172b3a; line-height:1.6;">${makeClickable(correctedSentence)}</span><br><br>
+                      <strong>Dịch sang tiếng Việt:</strong><br><span style="color:#607383">${escapeHtml(translatedText)}</span>`;
+    }
+  } catch(e) {
+    fb.className = 'feedback show bad';
+    fb.innerHTML = 'Không thể kết nối đến máy chủ AI. Dù sao bạn cũng đã hoàn thành việc đặt câu!';
+  }
+  
+  checkingSentence = false;
+  $('next').disabled = false; 
+  $('viTranslationArea').classList.remove('hidden');
+}
+
+async function translateViToEn() {
+  const viSentence = $('viSentenceInput').value.trim();
+  const fb = $('viSentenceFeedback');
+  const item = typingDeck[typingIndex];
+  
+  if (!viSentence) {
+    fb.className = 'feedback show bad';
+    fb.innerHTML = 'Hãy nhập câu tiếng Việt của bạn trước khi dịch.';
+    return;
+  }
+  
+  checkingSentence = true;
+  $('next').disabled = true;
+  $('submitViSentence').disabled = true;
+  $('viSentenceInput').disabled = true;
+  $('wordLookupArea').classList.add('hidden');
+  
+  fb.className = 'feedback show';
+  fb.innerHTML = '⏳ Đang dịch sang tiếng Anh và chèn từ khóa...';
+  
+  try {
+    let engTranslatedText = "";
+    try {
+        const prompt = `Translate this Vietnamese sentence to English. You MUST use the exact English word "${item.word}" in your translation. Return ONLY the English translation without quotes or extra text. Sentence: "${viSentence}"`;
+        const aiRes = await fetch(`https://text.pollinations.ai/prompt/${encodeURIComponent(prompt)}`);
+        if (aiRes.ok) {
+            engTranslatedText = await aiRes.text();
+            engTranslatedText = engTranslatedText.replace(/^"|"$/g, '').trim();
+        } else {
+            throw new Error("AI API failed");
+        }
+    } catch(aiErr) {
+        const trRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(viSentence)}&langpair=vi|en`);
+        const trData = await trRes.json();
+        engTranslatedText = trData.responseData.translatedText;
+    }
+
+    const engTense = detectTense(engTranslatedText);
+    
+    let wordUsedHtml = "";
+    if (engTranslatedText.toLowerCase().includes(item.word.toLowerCase())) {
+        wordUsedHtml = `✅ Đã sử dụng từ: <b>${escapeHtml(item.word)}</b>`;
+    } else {
+        wordUsedHtml = `⚠️ AI không thể ghép từ <b>${escapeHtml(item.word)}</b> vào câu.`;
+    }
+    
+    fb.className = 'feedback show good';
+    fb.innerHTML = `<strong>Dịch tự động sang tiếng Anh: </strong> <span style="color:var(--muted); font-size:12px;">(💡 Click vào từ để tra nghĩa & nghe)</span><br><span style="color:#2878a5; line-height:1.6; font-size: 16px;">${makeClickable(engTranslatedText)}</span><br><br>
+                    <strong>Tình trạng:</strong> ${wordUsedHtml}<br>
+                    <strong>Thì (Tense) phân tích được:</strong> <span style="color:#2a9d8f">${escapeHtml(engTense)}</span>`;
+  } catch(e) {
+    fb.className = 'feedback show bad';
+    fb.innerHTML = 'Không thể kết nối đến máy chủ dịch thuật lúc này. Vui lòng thử lại sau.';
+    $('submitViSentence').disabled = false;
+    $('viSentenceInput').disabled = false;
+  }
+  
+  checkingSentence = false;
+  $('next').disabled = false;
+}
+
+function nextQuestion(){
+  if(!answered) return;
+  if(checkingSentence) return;
+  
+  if (!isTypingPhase) {
+    if ((index + 1) % 10 === 0) {
+      startTypingPhase();
+    } else {
+      if (index < deck.length - 1) {
+        index++;
+        renderQuestion();
+      } else {
+        finishGame();
+      }
+    }
+  } else {
+    if (typingIndex < typingDeck.length - 1) {
+      typingIndex++;
+      renderTypingQuestion();
+    } else {
+      isTypingPhase = false;
+      if (index < deck.length - 1) {
+        index++;
+        renderQuestion();
+      } else {
+        finishGame();
+      }
+    }
+  }
+}
+
+function finishGame(){
+  $('game').classList.add('hidden');$('result').classList.remove('hidden');
+  const pct = totalAnswered > 0 ? Math.round(correct / totalAnswered * 100) : 0;
+  $('resultEmoji').textContent = pct >= 90 ? '🏆' : pct >= 70 ? '🌟' : pct >= 50 ? '💪' : '📚';
+  $('resultTitle').textContent = pct >= 90 ? 'Xuất sắc!' : pct >= 70 ? 'Làm tốt lắm!' : pct >= 50 ? 'Bạn đang tiến bộ!' : 'Cùng luyện thêm nhé!';
+  $('resultText').textContent = `Bạn đã hoàn thành tổng cộng ${totalAnswered} lần hỏi (bao gồm trắc nghiệm và gõ từ).`;
+  $('finalScore').textContent = score;
+  $('finalCorrect').textContent = `${correct}/${totalAnswered}`;
+  $('finalPercent').textContent = pct + '\%';$('progressBar').style.width = '100%';
+  
+  if(misses.length){
+      $('mistakesWrap').classList.remove('hidden');$('mistakes').innerHTML = unique(misses.map(v=>v.word)).map(word=>{
+          const v = misses.find(x=>x.word===word);
+          return `<div style="padding:10px 0;border-bottom:1px solid #d9e3eb"><b>${escapeHtml(v.word)}</b> <span style="color:#607383">(${escapeHtml(v.pos)})</span><br>${escapeHtml(v.meaning)} <small style="color:#607383">· ${escapeHtml(v.topic)}</small></div>`
+      }).join('');
+  } else {
+      $('mistakesWrap').classList.add('hidden');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
