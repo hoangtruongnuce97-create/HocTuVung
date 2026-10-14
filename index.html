@@ -233,8 +233,7 @@ async function lookupWord(word) {
   const cleanWord = word.replace(/[^a-zA-Z\-']/g, '').toLowerCase();
   if (!cleanWord) return;
   
-  $('wordLookupArea').classList.remove('hidden');
-  $('lookupWordTarget').textContent = cleanWord;
+  $('wordLookupArea').classList.remove('hidden');$('lookupWordTarget').textContent = cleanWord;
   $('lookupWordResult').innerHTML = '<span style="color:var(--muted)">⏳ Đang tra từ...</span>';
   
   try {
@@ -263,7 +262,7 @@ async function lookupWord(word) {
          
          const wrap = document.getElementById('phoneticWrap');
          if (wrap) {
-             if (phonetic) wrap.innerHTML = `<b>Phiên âm (Anh):</b> <span style="color:#2a9d8f; font-family: monospace; font-size:16px;">${escapeHtml(phonetic)}</span>${speakBtn}`;
+             if (phonetic) wrap.innerHTML = `<b>Phiên âm (Anh):</b> <span style="color:#2a9d8f; font-family: monospace; font-size:16px;">${escapeHtml(phonetic)}</span> ${speakBtn}`;
              else wrap.innerHTML = `<b>Phiên âm (Anh):</b> <i style="color:#607383; font-size:13px;">(Không có sẵn)</i> ${speakBtn}`;
          }
       })
@@ -279,7 +278,7 @@ async function lookupWord(word) {
              }
              const wrap = document.getElementById('phoneticWrap');
              if (wrap) {
-                 if (phonetic) wrap.innerHTML = `<b>Phiên âm (Anh):</b> <span style="color:#2a9d8f; font-family: monospace; font-size:16px;">${escapeHtml(phonetic)}</span>${speakBtn}`;
+                 if (phonetic) wrap.innerHTML = `<b>Phiên âm (Anh):</b> <span style="color:#2a9d8f; font-family: monospace; font-size:16px;">${escapeHtml(phonetic)}</span> ${speakBtn}`;
                  else wrap.innerHTML = `<b>Phiên âm (Anh):</b> <i style="color:#607383; font-size:13px;">(Không có sẵn)</i> ${speakBtn}`;
              }
           }).catch(() => {
@@ -306,15 +305,13 @@ function startGame(){
   misses=[]; answered=false; isTypingPhase=false; checkingSentence=false;
   
   $('setup').classList.add('hidden');
-  $('result').classList.add('hidden');
-  $('game').classList.remove('hidden');
+  $('result').classList.add('hidden');$('game').classList.remove('hidden');
   renderQuestion();
 }
 
 function renderQuestion(){
   answered=false; checkingSentence = false;
-  const item=deck[index], vi=$('direction').value==='envi';
-  $('qNumber').textContent=`Câu ${index+1}/${deck.length}`;
+  const item=deck[index], vi=$('direction').value==='envi';$('qNumber').textContent=`Câu ${index+1}/${deck.length}`;
   $('topicBadge').textContent=item.topic;
   $('progressBar').style.width=`${index/deck.length*100}%`;
   
@@ -333,10 +330,8 @@ function renderQuestion(){
     $('pos').textContent = 'Chọn từ tiếng Anh phù hợp';
   }
   
-  $('typingArea').classList.add('hidden');
-  $('sentenceArea').classList.add('hidden');
-  $('answers').classList.remove('hidden');
-  $('wordLookupArea').classList.add('hidden');
+  $('typingArea').classList.add('hidden');$('sentenceArea').classList.add('hidden');
+  $('answers').classList.remove('hidden');$('wordLookupArea').classList.add('hidden');
   
   $('feedback').className='feedback';$('feedback').textContent='';
   $('next').disabled=true;$('next').textContent=index===deck.length-1?'Xem kết quả →':'Tiếp theo →';
@@ -420,20 +415,13 @@ function renderTypingQuestion() {
   $('pos').textContent = 'Gõ từ tiếng Anh tương ứng (' + item.pos + ')';
   
   $('answers').classList.add('hidden');
-  $('sentenceArea').classList.add('hidden');
-  $('viTranslationArea').classList.add('hidden');
-  $('wordLookupArea').classList.add('hidden');
-  $('typingArea').classList.remove('hidden');
+  $('sentenceArea').classList.add('hidden');$('viTranslationArea').classList.add('hidden');
+  $('wordLookupArea').classList.add('hidden');$('typingArea').classList.remove('hidden');
   
-  $('typeInput').value = '';
-  $('typeInput').disabled = false;
+  $('typeInput').value = '';$('typeInput').disabled = false;
   $('submitType').disabled = false;
-  $('typeInput').focus();
-  
-  $('feedback').className = 'feedback'; 
-  $('feedback').textContent = '';
-  
-  $('next').disabled = true;
+  $('typeInput').focus();$('feedback').className = 'feedback'; 
+  $('feedback').textContent = '';$('next').disabled = true;
   $('next').textContent = (typingIndex === typingDeck.length - 1 && index === deck.length - 1) ? 'Xem kết quả →' : 'Tiếp theo →';
 }
 
@@ -478,24 +466,17 @@ function checkTypingAnswer() {
 function prepareSentencePhase(item) {
   checkingSentence = false;
   $('next').disabled = false;
-  $('sentenceArea').classList.remove('hidden');
-  $('viTranslationArea').classList.add('hidden');
-  $('wordLookupArea').classList.add('hidden');
-  
-  $('targetWord').textContent = item.word;
+  $('sentenceArea').classList.remove('hidden');$('viTranslationArea').classList.add('hidden');
+  $('wordLookupArea').classList.add('hidden');$('targetWord').textContent = item.word;
   $('targetWordVi').textContent = item.word; 
   
-  $('sentenceInput').value = '';
-  $('sentenceInput').disabled = false;
+  $('sentenceInput').value = '';$('sentenceInput').disabled = false;
   $('submitSentence').disabled = false;
-  $('sentenceFeedback').className = 'feedback';
-  $('sentenceFeedback').innerHTML = '';
+  $('sentenceFeedback').className = 'feedback';$('sentenceFeedback').innerHTML = '';
   
-  $('viSentenceInput').value = '';
-  $('viSentenceInput').disabled = false;
+  $('viSentenceInput').value = '';$('viSentenceInput').disabled = false;
   $('submitViSentence').disabled = false;
-  $('viSentenceFeedback').className = 'feedback';
-  $('viSentenceFeedback').innerHTML = '';
+  $('viSentenceFeedback').className = 'feedback';$('viSentenceFeedback').innerHTML = '';
 }
 
 async function analyzeSentence() {
@@ -568,4 +549,142 @@ async function analyzeSentence() {
       if (matches.length > 2) errorsHtml += `<li>Và một số lỗi nhỏ khác...</li>`;
       errorsHtml += '</ul>';
       errorsHtml += `<strong>Thì (Tense) sử dụng:</strong> <span style="color:#2a9d8f">${escapeHtml(tenseName)}</span><br><br>`;
-      errorsHtml += `<strong>Gợi ý câu
+      errorsHtml += `<strong>Gợi ý câu đúng sát nghĩa: </strong> <span style="color:var(--muted); font-size:12px;">(💡 Click vào từ để tra nghĩa & nghe phát âm)</span><br><span style="color:#2878a5; line-height:1.6;">${makeClickable(correctedSentence)}</span><br><br>`;
+      errorsHtml += `<strong>Dịch sang tiếng Việt:</strong><br><span style="color:#607383">${escapeHtml(translatedText)}</span>`;
+      
+      fb.innerHTML = errorsHtml;
+    } else {
+      fb.className = 'feedback show good';
+      score += 5; 
+      $('score').textContent = score;
+      fb.innerHTML = `<strong>Tuyệt vời!</strong> Câu của bạn đúng ngữ pháp. (+5 điểm) 🎉<br><br>
+                      <strong>Thì (Tense) sử dụng:</strong> <span style="color:#2a9d8f">${escapeHtml(tenseName)}</span><br><br>
+                      <strong>Câu của bạn: </strong> <span style="color:var(--muted); font-size:12px;">(💡 Click vào từ để tra nghĩa & nghe phát âm)</span><br><span style="color:#172b3a; line-height:1.6;">${makeClickable(correctedSentence)}</span><br><br>
+                      <strong>Dịch sang tiếng Việt:</strong><br><span style="color:#607383">${escapeHtml(translatedText)}</span>`;
+    }
+  } catch(e) {
+    fb.className = 'feedback show bad';
+    fb.innerHTML = 'Không thể kết nối đến máy chủ AI. Dù sao bạn cũng đã hoàn thành việc đặt câu!';
+  }
+  
+  checkingSentence = false;
+  $('next').disabled = false; 
+  $('viTranslationArea').classList.remove('hidden');
+}
+
+async function translateViToEn() {
+  const viSentence = $('viSentenceInput').value.trim();
+  const fb = $('viSentenceFeedback');
+  const item = typingDeck[typingIndex];
+  
+  if (!viSentence) {
+    fb.className = 'feedback show bad';
+    fb.innerHTML = 'Hãy nhập câu tiếng Việt của bạn trước khi dịch.';
+    return;
+  }
+  
+  checkingSentence = true;
+  $('next').disabled = true;
+  $('submitViSentence').disabled = true;
+  $('viSentenceInput').disabled = true;
+  $('wordLookupArea').classList.add('hidden');
+  
+  fb.className = 'feedback show';
+  fb.innerHTML = '⏳ Đang dịch sang tiếng Anh và chèn từ khóa...';
+  
+  try {
+    let engTranslatedText = "";
+    try {
+        const prompt = `Translate this Vietnamese sentence to English. You MUST use the exact English word "${item.word}" in your translation. Return ONLY the English translation without quotes or extra text. Sentence: "${viSentence}"`;
+        const aiRes = await fetch(`https://text.pollinations.ai/prompt/${encodeURIComponent(prompt)}`);
+        if (aiRes.ok) {
+            engTranslatedText = await aiRes.text();
+            engTranslatedText = engTranslatedText.replace(/^"|"$/g, '').trim();
+        } else {
+            throw new Error("AI API failed");
+        }
+    } catch(aiErr) {
+        const trRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(viSentence)}&langpair=vi|en`);
+        const trData = await trRes.json();
+        engTranslatedText = trData.responseData.translatedText;
+    }
+
+    const engTense = detectTense(engTranslatedText);
+    
+    let wordUsedHtml = "";
+    if (engTranslatedText.toLowerCase().includes(item.word.toLowerCase())) {
+        wordUsedHtml = `✅ Đã sử dụng từ: <b>${escapeHtml(item.word)}</b>`;
+    } else {
+        wordUsedHtml = `⚠️ AI không thể ghép từ <b>${escapeHtml(item.word)}</b> vào câu.`;
+    }
+    
+    fb.className = 'feedback show good';
+    fb.innerHTML = `<strong>Dịch tự động sang tiếng Anh: </strong> <span style="color:var(--muted); font-size:12px;">(💡 Click vào từ để tra nghĩa & nghe)</span><br><span style="color:#2878a5; line-height:1.6; font-size: 16px;">${makeClickable(engTranslatedText)}</span><br><br>
+                    <strong>Tình trạng:</strong> ${wordUsedHtml}<br>
+                    <strong>Thì (Tense) phân tích được:</strong> <span style="color:#2a9d8f">${escapeHtml(engTense)}</span>`;
+  } catch(e) {
+    fb.className = 'feedback show bad';
+    fb.innerHTML = 'Không thể kết nối đến máy chủ dịch thuật lúc này. Vui lòng thử lại sau.';
+    $('submitViSentence').disabled = false;
+    $('viSentenceInput').disabled = false;
+  }
+  
+  checkingSentence = false;
+  $('next').disabled = false;
+}
+
+function nextQuestion(){
+  if(!answered) return;
+  if(checkingSentence) return;
+  
+  if (!isTypingPhase) {
+    if ((index + 1) % 10 === 0) {
+      startTypingPhase();
+    } else {
+      if (index < deck.length - 1) {
+        index++;
+        renderQuestion();
+      } else {
+        finishGame();
+      }
+    }
+  } else {
+    if (typingIndex < typingDeck.length - 1) {
+      typingIndex++;
+      renderTypingQuestion();
+    } else {
+      isTypingPhase = false;
+      if (index < deck.length - 1) {
+        index++;
+        renderQuestion();
+      } else {
+        finishGame();
+      }
+    }
+  }
+}
+
+function finishGame(){
+  $('game').classList.add('hidden');$('result').classList.remove('hidden');
+  const pct = totalAnswered > 0 ? Math.round(correct / totalAnswered * 100) : 0;
+  $('resultEmoji').textContent = pct >= 90 ? '🏆' : pct >= 70 ? '🌟' : pct >= 50 ? '💪' : '📚';
+  $('resultTitle').textContent = pct >= 90 ? 'Xuất sắc!' : pct >= 70 ? 'Làm tốt lắm!' : pct >= 50 ? 'Bạn đang tiến bộ!' : 'Cùng luyện thêm nhé!';
+  $('resultText').textContent = `Bạn đã hoàn thành tổng cộng ${totalAnswered} lần hỏi (bao gồm trắc nghiệm và gõ từ).`;
+  $('finalScore').textContent = score;
+  $('finalCorrect').textContent = `${correct}/${totalAnswered}`;
+  $('finalPercent').textContent = pct + '\%';$('progressBar').style.width = '100%';
+  
+  if(misses.length){
+      $('mistakesWrap').classList.remove('hidden');$('mistakes').innerHTML = unique(misses.map(v=>v.word)).map(word=>{
+          const v = misses.find(x=>x.word===word);
+          return `<div style="padding:10px 0;border-bottom:1px solid #d9e3eb"><b>${escapeHtml(v.word)}</b> <span style="color:#607383">(${escapeHtml(v.pos)})</span><br>${escapeHtml(v.meaning)} <small style="color:#607383">· ${escapeHtml(v.topic)}</small></div>`
+      }).join('');
+  } else {
+      $('mistakesWrap').classList.add('hidden');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
